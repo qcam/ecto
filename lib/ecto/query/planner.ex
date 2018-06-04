@@ -747,6 +747,9 @@ defmodule Ecto.Query.Planner do
       :update_all ->
         assert_update!(query, operation)
         assert_only_filter_expressions!(query, operation)
+      :update ->
+        assert_update!(query, operation)
+        assert_only_filter_expressions!(query, operation)
       :delete_all ->
         assert_no_update!(query, operation)
         assert_only_filter_expressions!(query, operation)

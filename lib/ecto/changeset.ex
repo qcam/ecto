@@ -245,7 +245,7 @@ defmodule Ecto.Changeset do
   # If a new field is added here, def merge must be adapted
   defstruct valid?: false, data: nil, params: nil, changes: %{},
             errors: [], validations: [], required: [], prepare: [],
-            constraints: [], filters: %{}, action: nil, types: nil,
+            constraints: [], filters: [], action: nil, types: nil,
             empty_values: @empty_values, repo: nil, repo_opts: []
 
   @type t(data_type) :: %Changeset{valid?: boolean(),
@@ -871,7 +871,8 @@ defmodule Ecto.Changeset do
     new_repo        = merge_identical(cs1.repo, cs2.repo, "repos")
     new_repo_opts   = Keyword.merge(cs1.repo_opts, cs2.repo_opts)
     new_action      = merge_identical(cs1.action, cs2.action, "actions")
-    new_filters     = Map.merge(cs1.filters, cs2.filters)
+    # new_filters     = Map.merge(cs1.filters, cs2.filters)
+    new_filters     = cs1.filters ++ cs2.filters
     new_validations = cs1.validations ++ cs2.validations
     new_constraints = cs1.constraints ++ cs2.constraints
     new_empty_vals  = Enum.uniq(cs1.empty_values ++ cs2.empty_values)
@@ -2042,8 +2043,12 @@ defmodule Ecto.Changeset do
   def optimistic_lock(data_or_changeset, field, incrementer \\ &(&1 + 1)) do
     changeset = change(data_or_changeset, %{})
     current = get_field(changeset, field)
-    changeset.filters[field]
-    |> put_in(current)
+
+    filter = Ecto.Query.dynamic([binding], field(binding, ^field) == ^current)
+    new_filters = [filter | changeset.filters]
+
+    changeset.filters
+    |> put_in(new_filters)
     |> force_change(field, incrementer.(current))
   end
 
