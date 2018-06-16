@@ -96,8 +96,8 @@ defmodule Ecto.TestAdapter do
     {:ok, Enum.zip(return, 1..length(return))}
   end
 
-  def update(_, %{context: {:invalid, _} = res}, [_|_], _filters, _return, _opts) do
-    res
+  def update(_, query, _return, _opts) do
+    query
   end
 
   def delete(_, meta, _filter, _opts) do
