@@ -301,14 +301,19 @@ defmodule Ecto.Repo.Schema do
           schema_meta = metadata(struct, schema.__schema__(:autogenerate_id), opts)
           filters = dump_fields!(:update, schema, filters, dumper, adapter)
 
-          query =
-            Enum.reduce(filters, from(schema_meta), fn filter, query ->
-              where(query, where: ^filter)
-            end)
-            |> update(set: ^(changes ++ autogen))
-
-          {query, _, _} = Ecto.Query.Planner.prepare(query, :update, adapter, 0)
-          {query, _} = Ecto.Query.Planner.normalize(query, :update, adapter, 0)
+          filter_query =
+            if changes ++ autogen != [] do
+              query =
+                Enum.reduce(filters, from(schema), fn filter, query ->
+                  where(query, where: ^filter)
+                end)
+              query = update(query, set: ^(changes ++ autogen))
+              {query, _params, _} = Ecto.Query.Planner.prepare(query, :update, adapter, 0)
+              {query, _} = Ecto.Query.Planner.normalize(query, :update, adapter, 0)
+              query
+            else
+              nil
+            end
 
           args = [adapter_meta, query, return_sources, opts]
 

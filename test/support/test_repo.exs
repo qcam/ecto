@@ -91,8 +91,8 @@ defmodule Ecto.TestAdapter do
   end
 
   # Notice the list of changes is never empty.
-  def update(_, %{context: nil, source: source, prefix: prefix}, [_|_], _filters, return, _opts) do
-    send(test_process(), {:update, {prefix, source}})
+  def update(_, %Ecto.Query{prefix: prefix, from: from} = query, return, _opts) do
+    send(test_process(), {:update, {query.prefix, query.from}})
     {:ok, Enum.zip(return, 1..length(return))}
   end
 
