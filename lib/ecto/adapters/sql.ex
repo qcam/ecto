@@ -92,10 +92,8 @@ defmodule Ecto.Adapters.SQL do
       end
 
       @doc false
-      def update(adapter_meta, %{source: source, prefix: prefix}, fields, params, returning, opts) do
-        {fields, field_values} = :lists.unzip(fields)
-        filter_values = params |> Keyword.values() |> Enum.reject(&is_nil(&1))
-        sql = @conn.update(prefix, source, fields, params, returning)
+      def update(adapter_meta, query, returning, opts) do
+        sql = @conn.update(query, returning)
         Ecto.Adapters.SQL.struct(adapter_meta, @conn, sql, {:update, source, params}, field_values ++ filter_values, :raise, returning, opts)
       end
 
