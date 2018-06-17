@@ -310,6 +310,7 @@ defmodule Ecto.Repo.Schema do
               query = update(query, set: ^changes)
               {query, _params, _} = Ecto.Query.Planner.prepare(query, :update, adapter, 0)
               {query, _} = Ecto.Query.Planner.normalize(query, :update, adapter, 0)
+              
               query
             else
               nil
